@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * @file     cmsis_gcc.h
+ * @file     nmsis_gcc.h
  * @brief    NMSIS compiler GCC header file
  * @version  V1.0.0
  * @date     18. October 2019
