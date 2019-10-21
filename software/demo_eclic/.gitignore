@@ -1,2 +1,4 @@
 demo_eclic
 *.dump
+*.verilog
+*.o

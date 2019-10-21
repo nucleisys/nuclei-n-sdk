@@ -1,3 +1,5 @@
 /*.o
 coremark
+*.dump
+*.verilog
 
