@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "cpuidh.h"
 #include "config.h"
-#include "drivers/func.h"
+#include "core/drivers/func.h"
 
 volatile SPDP  theseSecs = 0.0;
 volatile SPDP  startSecs = 0.0;

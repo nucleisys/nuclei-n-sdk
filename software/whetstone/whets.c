@@ -184,10 +184,10 @@
 #include "core/drivers/func.h"
 #include "soc/drivers/soc.h"
 #include "soc/drivers/board.h"
-#include "core/drivers/riscv_encoding.h"
-#include "core/drivers/timer.h"
-#include "core/drivers/eclic.h"
-#include "core/drivers/riscv_bits.h"
+#include "drivers/riscv_encoding.h"
+#include "drivers/timer.h"
+#include "drivers/eclic.h"
+#include "drivers/riscv.h"
 
  /*PRECISION PRECISION PRECISION PRECISION PRECISION PRECISION PRECISION*/
 

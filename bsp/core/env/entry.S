@@ -3,8 +3,8 @@
 #ifndef ENTRY_S
 #define ENTRY_S
 
+#include "drivers/riscv.h"
 #include "drivers/riscv_encoding.h"
-#include "drivers/riscv_bits.h"
 #include "drivers/eclic.h"
 #include "drivers/timer.h"
 

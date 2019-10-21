@@ -13,7 +13,6 @@
 #include "drivers/riscv_encoding.h"
 #include "drivers/timer.h"
 #include "drivers/eclic.h"
-#include "drivers/riscv_bits.h"
 
 #define BUTTON_1_GPIO_OFFSET 30
 #define BUTTON_2_GPIO_OFFSET 31

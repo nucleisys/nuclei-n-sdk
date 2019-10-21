@@ -29,40 +29,6 @@ static void prvSetupHardware( void );
 extern void idle_task(void);
 
 
-void wait_seconds(size_t n)
-{
-  unsigned long start_mtime, delta_mtime;
-
-  // Don't start measuruing until we see an mtime tick
-  unsigned long tmp = mtime_lo();
-  do {
-    start_mtime = mtime_lo();
-  } while (start_mtime == tmp);
-
-  do {
-    delta_mtime = mtime_lo() - start_mtime;
-  } while (delta_mtime < (n * TIMER_FREQ));
-
- // printf("-----------------Waited %d seconds.\n", n);
-}
-
-
-void config_eclic_irqs (){
-
-  eclic_enable_interrupt (ECLIC_INT_DEVICE_BUTTON_1);
-  eclic_enable_interrupt (ECLIC_INT_DEVICE_BUTTON_2);
-
-  eclic_set_nlbits(3);
-  //  The button have higher level
-
-  eclic_set_irq_lvl_abs(ECLIC_INT_DEVICE_BUTTON_1, 2);
-  eclic_set_irq_lvl_abs(ECLIC_INT_DEVICE_BUTTON_2, 3);
-
-  //  The MTIME using Vector-Mode
-  eclic_set_vmode(ECLIC_INT_MTIP);
-
- } 
-
 
 void gpio_init(){
   GPIO_REG(GPIO_INPUT_EN)    &= ~((0x1<< RED_LED_GPIO_OFFSET) | (0x1<< GREEN_LED_GPIO_OFFSET) | (0x1 << BLUE_LED_GPIO_OFFSET)) ;
@@ -87,34 +53,12 @@ void button_init(){
 }
 
 
-void BUTTON_1_HANDLER(void) {   
-
-    printf ("%s","----Begin button1 handler\n");
-    GPIO_REG(GPIO_OUTPUT_VAL) ^= (0x1 << BLUE_LED_GPIO_OFFSET);
-    printf ("%s","----red LED off or on\n");
-    wait_seconds(5);
-    printf ("%s","----End button1 handler\n");
-
-    GPIO_REG(GPIO_RISE_IP) = (0x1 << BUTTON_1_GPIO_OFFSET);  
-};
-void BUTTON_2_HANDLER(void) {
- 
-    printf ("%s","--------Begin button2 handler\n");
-    printf ("%s","--------Higher level\n");
-    GPIO_REG(GPIO_OUTPUT_VAL) ^= (0x1 << GREEN_LED_GPIO_OFFSET);
-    wait_seconds(5);
-    printf ("%s","--------End button2 handler\n");    
-
-    GPIO_REG(GPIO_RISE_IP) = (0x1 << BUTTON_2_GPIO_OFFSET);
-
-};
 
 
 void prvSetupHardware( void )
 {
     button_init();
     gpio_init();
-    config_eclic_irqs();
 }
 
 
@@ -174,9 +118,6 @@ void start_task(void *args)
 	OSTaskCreate(task2,NULL,&task2_stk[STK_LEN-1],TASK2_PRIO);
   OSTaskCreate(task3,NULL,&task3_stk[STK_LEN-1],TASK3_PRIO);
   OSTaskSuspend(TASK_START_PRIO);
-//	enable_time_int();
-//	enable_global_int();
- //for(;;){}
 }
 
 int main(void)

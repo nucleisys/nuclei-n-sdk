@@ -21,7 +21,6 @@
 #include "drivers/riscv_encoding.h"
 #include "drivers/timer.h"
 #include "drivers/eclic.h"
-#include "drivers/riscv_bits.h"
 #include "driver/eth/W5100.h"
 
 

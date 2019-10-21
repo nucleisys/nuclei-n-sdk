@@ -61,7 +61,7 @@ RISCV_ARCH := rv32imafdc
 RISCV_ABI  := ilp32d
 endif
 
-PFLOAT     := 1
+PFLOAT     := 0
 YOUR_PRINTF     := 0
 
 # Default target

@@ -11,7 +11,7 @@
 #include "drivers/riscv_encoding.h"
 #include "drivers/timer.h"
 #include "drivers/eclic.h"
-#include "drivers/riscv_bits.h"
+
 
 #define SPI2_MOSI_GPIO_OFFSET 27
 #define SPI2_MISO_GPIO_OFFSET 28

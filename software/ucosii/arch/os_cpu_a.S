@@ -4,7 +4,7 @@
 #include "drivers/riscv_encoding.h"
 #include "drivers/timer.h"
 #include "drivers/eclic.h"
-#include "drivers/riscv_bits.h"
+#include "drivers/riscv.h"
 
 
 #********************************************************************************************************
@@ -95,7 +95,6 @@ OS_CPU_SR_Restore:
     csrw   mstatus, a0
     ret
 
-
 #********************************************************************************************************
 #                                         START MULTITASKING
 #                                      void OSStartHighRdy(void)
@@ -173,10 +172,6 @@ OS_CPU_SR_Restore:
     LOAD     t6,  30 * REGBYTES(sp)
     addi sp,sp,32*REGBYTES
 .endm
-
-
-
-
 
 
 .global trap_entry

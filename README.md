@@ -1,2 +1,10 @@
-# nuclei-n-sdk
-The purpose of this repo is to make it used by the commercial Nuclei N-Class processor cores series (N200/N300/N600/N900). About how to use this SDK, please refer to doc "Nuclei_N级别SDK使用说明"
+# README #
+The purpose of this repo is to make it used by the commercial nucleisy n series processor core.
+
+support below nucleisys core:
+* n200
+* n300
+* n600
+
+
+
