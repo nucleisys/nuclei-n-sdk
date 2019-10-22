@@ -136,7 +136,7 @@ dasm: software
 #############################################################
 # This Section is for uploading a program to SPI Flash
 #############################################################
-RISCV_OPENOCD_PATH ?= ./prebuilt_tools
+RISCV_OPENOCD_PATH ?= ./prebuilt_tools/openocd
 RISCV_OPENOCD ?= $(RISCV_OPENOCD_PATH)/bin/openocd
 
 
