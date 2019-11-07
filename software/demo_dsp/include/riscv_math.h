@@ -2,7 +2,7 @@
  * @file     riscv_math.h
  * @brief    Public header file for NMSIS DSP Library
  * @version  V1.0.0
- * @date     18. October 2019
+ * @date     20. October 2019
  ******************************************************************************/
 
 /**
@@ -12,7 +12,7 @@
    * ------------
    *
    * This user manual describes the NMSIS DSP software library,
-   * a suite of common signal processing functions for use on N-level processor based devices.
+   * a suite of common signal processing functions for use on RISC-V processor based devices.
    *
    * The library is divided into a number of functions each covering a specific category:
    * - Basic math functions
@@ -29,7 +29,157 @@
    * The library has separate functions for operating on 8-bit integers, 16-bit integers,
    * 32-bit integer and 32-bit floating-point values.
    *
- * 
+   * Using the Library
+   * ------------
+   *
+   * The library functions are declared in the public file <code>riscv_math.h</code> which is placed in the <code>Include</code> folder.
+   * Simply include this file and link the appropriate library in the application and begin calling the library functions. The Library supports single
+   * public header file <code> riscv_math.h</code> for RISC-V cores with little endian . Same header file will be used for floating point unit(FPU) variants.
+   *
+   *
+   * Examples
+   * --------
+   *
+   * The library ships with a number of examples which demonstrate how to use the library functions.
+   *
+   * Toolchain Support
+   * ------------
+   *
+   * The library is being tested in GCC toolchains and updates on this activity will be made available shortly.
+   *
+   * Building the Library
+   * ------------
+   *
+   * Each library project have different preprocessor macros.
+   *
+   * - RISCV_MATH_MATRIX_CHECK:
+   *
+   * Define macro RISCV_MATH_MATRIX_CHECK for checking on the input and output sizes of matrices
+   *
+   * - RISCV_MATH_ROUNDING:
+   *
+   * Define macro RISCV_MATH_ROUNDING for rounding on support functions
+   *
+   * - RISCV_MATH_LOOPUNROLL:
+   *
+   * Define macro RISCV_MATH_LOOPUNROLL to enable manual loop unrolling in DSP functions
+   *
+
+
+/**
+ * @defgroup groupMath Basic Math Functions
+ */
+
+/**
+ * @defgroup groupFastMath Fast Math Functions
+ * This set of functions provides a fast approximation to sine, cosine, and square root.
+ * As compared to most of the other functions in the NMSIS math library, the fast math functions
+ * operate on individual values and not arrays.
+ * There are separate functions for Q15, Q31, and floating-point data.
+ *
+ */
+
+/**
+ * @defgroup groupCmplxMath Complex Math Functions
+ * This set of functions operates on complex data vectors.
+ * The data in the complex arrays is stored in an interleaved fashion
+ * (real, imag, real, imag, ...).
+ * In the API functions, the number of samples in a complex array refers
+ * to the number of complex values; the array contains twice this number of
+ * real values.
+ */
+
+/**
+ * @defgroup groupFilters Filtering Functions
+ */
+
+/**
+ * @defgroup groupMatrix Matrix Functions
+ *
+ * This set of functions provides basic matrix math operations.
+ * The functions operate on matrix data structures.  For example,
+ * the type
+ * definition for the floating-point matrix structure is shown
+ * below:
+ * <pre>
+ *     typedef struct
+ *     {
+ *       uint16_t numRows;     // number of rows of the matrix.
+ *       uint16_t numCols;     // number of columns of the matrix.
+ *       float32_t *pData;     // points to the data of the matrix.
+ *     } riscv_matrix_instance_f32;
+ * </pre>
+ * There are similar definitions for Q15 and Q31 data types.
+ *
+ * The structure specifies the size of the matrix and then points to
+ * an array of data.  The array is of size <code>numRows X numCols</code>
+ * and the values are arranged in row order.  That is, the
+ * matrix element (i, j) is stored at:
+ * <pre>
+ *     pData[i*numCols + j]
+ * </pre>
+ *
+ * \par Init Functions
+ * There is an associated initialization function for each type of matrix
+ * data structure.
+ * The initialization function sets the values of the internal structure fields.
+ * Refer to \ref riscv_mat_init_f32(), \ref riscv_mat_init_q31() and \ref riscv_mat_init_q15()
+ * for floating-point, Q31 and Q15 types,  respectively.
+ *
+ * \par
+ * Use of the initialization function is optional. However, if initialization function is used
+ * then the instance structure cannot be placed into a const data section.
+ * To place the instance structure in a const data
+ * section, manually initialize the data structure.  For example:
+ * <pre>
+ * <code>riscv_matrix_instance_f32 S = {nRows, nColumns, pData};</code>
+ * <code>riscv_matrix_instance_q31 S = {nRows, nColumns, pData};</code>
+ * <code>riscv_matrix_instance_q15 S = {nRows, nColumns, pData};</code>
+ * </pre>
+ * where <code>nRows</code> specifies the number of rows, <code>nColumns</code>
+ * specifies the number of columns, and <code>pData</code> points to the
+ * data array.
+ *
+ * \par Size Checking
+ * By default all of the matrix functions perform size checking on the input and
+ * output matrices. For example, the matrix addition function verifies that the
+ * two input matrices and the output matrix all have the same number of rows and
+ * columns. If the size check fails the functions return:
+ * <pre>
+ *     RISCV_MATH_SIZE_MISMATCH
+ * </pre>
+ * Otherwise the functions return
+ * <pre>
+ *     RISCV_MATH_SUCCESS
+ * </pre>
+ * There is some overhead associated with this matrix size checking.
+ * The matrix size checking is enabled via the \#define
+ * <pre>
+ */
+
+/**
+ * @defgroup groupTransforms Transform Functions
+ */
+
+/**
+ * @defgroup groupController Controller Functions
+ */
+
+/**
+ * @defgroup groupStats Statistics Functions
+ */
+
+/**
+ * @defgroup groupSupport Support Functions
+ */
+
+/**
+ * @defgroup groupInterpolation Interpolation Functions
+ * These functions perform 1- and 2-dimensional interpolation of data.
+ * Linear interpolation is used for 1-dimensional data and
+ * bilinear interpolation is used for 2-dimensional data.
+ */
+
 /**
  * @defgroup groupExamples Examples
  */
@@ -37,29 +187,55 @@
 #ifndef _RISCV_MATH_H
 #define _RISCV_MATH_H
 
-/* Compiler specific diagnostic adjustment, only use gcc */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#ifdef   __cplusplus
+extern "C"
+{
+#endif
 
-#define __RISCV_FEATURE_DSP 1
-#define __RISCV_FEATURE_DSP 1
+/* Compiler specific diagnostic adjustment */
 
-#include "nmsis_gcc.h"
+#if defined ( __GNUC__ )
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wsign-conversion"
+  #pragma GCC diagnostic ignored "-Wconversion"
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#elif defined ( __ICCRISCV__ )
+
+#elif defined ( __TI_RISCV__ )
+
+#elif defined ( __CSMC__ )
+
+#elif defined ( __TASKING__ )
+
+#elif defined ( _MSC_VER )
+
+#else
+  #error Unknown compiler
+#endif
+
+/* Included for instrinsics definitions */
+#ifndef   __ASM
+  #define __ASM                                  __asm
+#endif
+#ifndef   __INLINE
+  #define __INLINE                               inline
+#endif
+#ifndef   __STATIC_INLINE
+  #define __STATIC_INLINE                        static inline
+#endif
+#ifndef   __STATIC_FORCEINLINE                 
+  #define __STATIC_FORCEINLINE                   __attribute__((always_inline)) static inline
+#endif 
+
+
+#include "string.h"
 #include <math.h>
 #include "float.h"
 
 /* evaluate RISCV DSP feature */
 #if (defined (__RISCV_FEATURE_DSP) && (__RISCV_FEATURE_DSP == 1))
-  #define RISCV_MATH_DSP                   1
-  #define RISCV_MATH_LOOPUNROLL
-#endif
-
-
-#ifdef   __cplusplus
-extern "C"
-{
+    #define RISCV_MATH_DSP
 #endif
 
   /**
@@ -138,19 +314,6 @@ extern "C"
   typedef double float64_t;
 
 
-/**
-  @brief definition to read/write two 16 bit values.
-  @deprecated
- */
-#define __SIMD32_TYPE int32_t
-
-#define __SIMD32(addr)        (*(__SIMD32_TYPE **) & (addr))
-#define __SIMD32_CONST(addr)  ( (__SIMD32_TYPE * )   (addr))
-#define _SIMD32_OFFSET(addr)  (*(__SIMD32_TYPE * )   (addr))
-#define __SIMD64(addr)        (*(      int64_t **) & (addr))
-
-/* SIMD replacement */
-
 
 /**
   @brief         Read 2 Q15 from Q15 pointer.
@@ -162,8 +325,12 @@ __STATIC_FORCEINLINE q31_t read_q15x2 (
 {
   q31_t val;
 
-  memcpy (&val, pQ15, 4);
-
+  //memcpy (&val, pQ15, 4);
+	__ASM volatile (
+	"lw %0, (%1)"
+	:"=r"(val)
+	:"r"(*pQ15)
+	);
   return (val);
 }
 
@@ -177,10 +344,30 @@ __STATIC_FORCEINLINE q31_t read_q15x2_ia (
 {
   q31_t val;
 
-  memcpy (&val, *pQ15, 4);
+  //memcpy (&val, *pQ15, 4);
+	__ASM volatile (
+	"lw %0, (%1)"
+	:"=r"(val)
+	:"r"(*pQ15)
+	);
   *pQ15 += 2;
 
   return (val);
+}
+
+/**
+  @brief         Read 4 Q15 from Q15 pointer and increment pointer afterwards.
+  @param[in]     pQ15      points to input value
+  @return        Q31 value
+ */
+__STATIC_FORCEINLINE q63_t read_q15x4_ia (
+		q15_t ** pQ15)
+{
+	q63_t val;
+	val = *((q63_t *)*pQ15);
+	*pQ15 += 4;
+
+	return (val);
 }
 
 /**
@@ -193,10 +380,30 @@ __STATIC_FORCEINLINE q31_t read_q15x2_da (
 {
   q31_t val;
 
-  memcpy (&val, *pQ15, 4);
+  //memcpy (&val, *pQ15, 4);
+  __ASM volatile (
+    "lw %0, (%1)"
+	:"=r"(val)
+	:"r"(*pQ15)
+  		);
   *pQ15 -= 2;
 
   return (val);
+}
+
+/**
+  @brief         Read 4 Q15 from Q15 pointer and decrement pointer afterwards.
+  @param[in]     pQ15      points to input value
+  @return        Q31 value
+ */
+__STATIC_FORCEINLINE q31_t read_q15x4_da (
+		q15_t ** pQ15)
+{
+	q31_t val;
+	val = *((q63_t *)*pQ15);
+	*pQ15 -= 4;
+
+	return (val);
 }
 
 /**
@@ -209,10 +416,27 @@ __STATIC_FORCEINLINE void write_q15x2_ia (
   q15_t ** pQ15,
   q31_t    value)
 {
-  q31_t val = value;
-
-  memcpy (*pQ15, &val, 4);
+    __ASM volatile (
+    "sw %0, (%1)"
+	:
+	:"r"(value), "r"(*pQ15)
+	:"memory"
+  		);
   *pQ15 += 2;
+}
+
+/**
+  @brief         Write 4 Q15 to Q15 pointer and increment pointer afterwards.
+  @param[in]     pQ15      points to input value
+  @param[in]     value     Q31 value
+  @return        none
+ */
+__STATIC_FORCEINLINE void write_q15x4_ia (
+		q15_t ** pQ15,
+		q63_t    value)
+{
+	*((q63_t *)*pQ15) = value;
+	*pQ15 += 4;
 }
 
 /**
@@ -225,11 +449,41 @@ __STATIC_FORCEINLINE void write_q15x2 (
   q15_t * pQ15,
   q31_t   value)
 {
-  q31_t val = value;
+ __ASM volatile (
+    "sw %0, (%1)"
+	:
+	:"r"(value), "r"(pQ15)
+	:"memory"
+  		) ;
 
-  memcpy (pQ15, &val, 4);
 }
 
+/**
+  @brief         Write 4 Q15 to Q15 pointer.
+  @param[in]     pQ15      points to input value
+  @param[in]     value     Q31 value
+  @return        none
+ */
+__STATIC_FORCEINLINE void write_q15x4 (
+		q15_t * pQ15,
+		q63_t   value)
+{
+	*((q63_t *)pQ15) = value;
+}
+
+/**
+  @brief         Read 8 Q7 from Q7 pointer and increment pointer afterwards.
+  @param[in]     pQ7       points to input value
+  @return        Q31 value
+ */
+__STATIC_FORCEINLINE q63_t read_q7x8_ia (
+		q7_t ** pQ7)
+{
+	q63_t val;
+	val = *((q63_t *)*pQ7);
+	*pQ7 += 8;
+	return val;
+}
 
 /**
   @brief         Read 4 Q7 from Q7 pointer and increment pointer afterwards.
@@ -240,8 +494,11 @@ __STATIC_FORCEINLINE q31_t read_q7x4_ia (
   q7_t ** pQ7)
 {
   q31_t val;
-
-  memcpy (&val, *pQ7, 4);
+	__ASM volatile (
+	"lw %0, (%1)"
+	:"=r"(val)
+	:"r"(*pQ7)
+	);
   *pQ7 += 4;
 
   return (val);
@@ -257,10 +514,28 @@ __STATIC_FORCEINLINE q31_t read_q7x4_da (
 {
   q31_t val;
 
-  memcpy (&val, *pQ7, 4);
+	__ASM volatile (
+	"lw %0, (%1)"
+	:"=r"(val)
+	:"r"(*pQ7)
+	);
   *pQ7 -= 4;
 
   return (val);
+}
+
+/**
+  @brief         Write 8 Q7 to Q7 pointer and increment pointer afterwards.
+  @param[in]     pQ7       points to input value
+  @param[in]     value     Q63 value
+  @return        none
+ */
+__STATIC_FORCEINLINE void write_q7x8_ia (
+		q7_t ** pQ7,
+		q63_t   value)
+{
+	*((q63_t *)*pQ7) = value;
+	*pQ7 += 8;
 }
 
 /**
@@ -275,8 +550,13 @@ __STATIC_FORCEINLINE void write_q7x4_ia (
 {
   q31_t val = value;
 
-  memcpy (*pQ7, &val, 4);
-  *pQ7 += 4;
+	__ASM volatile (
+	"sw %0, (%1)"
+	:
+	:"r"(value), "r"(*pQ7)
+	:"memory"
+	) ;
+	*pQ7 += 4;
 }
 
 /**
@@ -440,46 +720,6 @@ __STATIC_FORCEINLINE void write_q7x4_ia (
     /* return num of signbits of out = 1/in value */
     return (signBits + 1);
   }
-
-#if defined(RISCV_MATH_NEON)
-
-static inline float32x4_t __riscv_vec_sqrt_f32_neon(float32x4_t  x)
-{
-    float32x4_t x1 = vmaxq_f32(x, vdupq_n_f32(FLT_MIN));
-    float32x4_t e = vrsqrteq_f32(x1);
-    e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, e), e), e);
-    e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x1, e), e), e);
-    return vmulq_f32(x, e);
-}
-
-static inline int16x8_t __riscv_vec_sqrt_q15_neon(int16x8_t vec)
-{
-    float32x4_t tempF;
-    int32x4_t tempHI,tempLO;
-
-    tempLO = vmovl_s16(vget_low_s16(vec));
-    tempF = vcvtq_n_f32_s32(tempLO,15);
-    tempF = __riscv_vec_sqrt_f32_neon(tempF);
-    tempLO = vcvtq_n_s32_f32(tempF,15);
-
-    tempHI = vmovl_s16(vget_high_s16(vec));
-    tempF = vcvtq_n_f32_s32(tempHI,15);
-    tempF = __riscv_vec_sqrt_f32_neon(tempF);
-    tempHI = vcvtq_n_s32_f32(tempF,15);
-
-    return(vcombine_s16(vqmovn_s32(tempLO),vqmovn_s32(tempHI)));
-}
-
-static inline int32x4_t __riscv_vec_sqrt_q31_neon(int32x4_t vec)
-{
-  float32x4_t temp;
-
-  temp = vcvtq_n_f32_s32(vec,31);
-  temp = __riscv_vec_sqrt_f32_neon(temp);
-  return(vcvtq_n_s32_f32(temp,31));
-}
-
-#endif
 
 /*
  * @brief C custom defined intrinsic functions
@@ -1058,7 +1298,7 @@ static inline int32x4_t __riscv_vec_sqrt_q31_neon(int32x4_t vec)
         int8_t postShift);
 
   /**
-   * @brief Fast but less precise processing function for the Q15 Biquad cascade filter for Cortex-M3 and Cortex-M4.
+   * @brief Fast but less precise processing function for the Q15 Biquad cascade filter for RISC-V3 and RISC-V4.
    * @param[in]  S          points to an instance of the Q15 Biquad cascade structure.
    * @param[in]  pSrc       points to the block of input data.
    * @param[out] pDst       points to the block of output data.
@@ -1084,7 +1324,7 @@ static inline int32x4_t __riscv_vec_sqrt_q31_neon(int32x4_t vec)
         uint32_t blockSize);
 
   /**
-   * @brief Fast but less precise processing function for the Q31 Biquad cascade filter for Cortex-M3 and Cortex-M4.
+   * @brief Fast but less precise processing function for the Q31 Biquad cascade filter for RISC-V3 and RISC-V4.
    * @param[in]  S          points to an instance of the Q31 Biquad cascade structure.
    * @param[in]  pSrc       points to the block of input data.
    * @param[out] pDst       points to the block of output data.
@@ -1319,7 +1559,7 @@ riscv_status riscv_mat_mult_q15(
         q15_t * pState);
 
   /**
-   * @brief Q15 matrix multiplication (fast variant) for Cortex-M3 and Cortex-M4
+   * @brief Q15 matrix multiplication (fast variant) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA   points to the first input matrix structure
    * @param[in]  pSrcB   points to the second input matrix structure
    * @param[out] pDst    points to output matrix structure
@@ -1347,7 +1587,7 @@ riscv_status riscv_mat_mult_q31(
         riscv_matrix_instance_q31 * pDst);
 
   /**
-   * @brief Q31 matrix multiplication (fast variant) for Cortex-M3 and Cortex-M4
+   * @brief Q31 matrix multiplication (fast variant) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA  points to the first input matrix structure
    * @param[in]  pSrcB  points to the second input matrix structure
    * @param[out] pDst   points to output matrix structure
@@ -2726,7 +2966,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Convolution of Q15 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Convolution of Q15 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA    points to the first input sequence.
    * @param[in]  srcALen  length of the first input sequence.
    * @param[in]  pSrcB    points to the second input sequence.
@@ -2742,7 +2982,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Convolution of Q15 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Convolution of Q15 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA      points to the first input sequence.
    * @param[in]  srcALen    length of the first input sequence.
    * @param[in]  pSrcB      points to the second input sequence.
@@ -2778,7 +3018,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Convolution of Q31 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Convolution of Q31 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA    points to the first input sequence.
    * @param[in]  srcALen  length of the first input sequence.
    * @param[in]  pSrcB    points to the second input sequence.
@@ -2897,7 +3137,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Partial convolution of Q15 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Partial convolution of Q15 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA       points to the first input sequence.
    * @param[in]  srcALen     length of the first input sequence.
    * @param[in]  pSrcB       points to the second input sequence.
@@ -2918,7 +3158,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Partial convolution of Q15 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Partial convolution of Q15 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA       points to the first input sequence.
    * @param[in]  srcALen     length of the first input sequence.
    * @param[in]  pSrcB       points to the second input sequence.
@@ -2964,7 +3204,7 @@ riscv_status riscv_rfft_4096_fast_init_f32 ( riscv_rfft_fast_instance_f32 * S );
 
 
   /**
-   * @brief Partial convolution of Q31 sequences (fast version) for Cortex-M3 and Cortex-M4
+   * @brief Partial convolution of Q31 sequences (fast version) for RISC-V3 and RISC-V4
    * @param[in]  pSrcA       points to the first input sequence.
    * @param[in]  srcALen     length of the first input sequence.
    * @param[in]  pSrcB       points to the second input sequence.
@@ -3114,7 +3354,7 @@ riscv_status riscv_fir_decimate_init_f32(
 
 
   /**
-   * @brief Processing function for the Q15 FIR decimator (fast variant) for Cortex-M3 and Cortex-M4.
+   * @brief Processing function for the Q15 FIR decimator (fast variant) for RISC-V3 and RISC-V4.
    * @param[in]  S          points to an instance of the Q15 FIR decimator structure.
    * @param[in]  pSrc       points to the block of input data.
    * @param[out] pDst       points to the block of output data
@@ -3161,7 +3401,7 @@ riscv_status riscv_fir_decimate_init_f32(
         uint32_t blockSize);
 
   /**
-   * @brief Processing function for the Q31 FIR decimator (fast variant) for Cortex-M3 and Cortex-M4.
+   * @brief Processing function for the Q31 FIR decimator (fast variant) for RISC-V3 and RISC-V4.
    * @param[in]  S          points to an instance of the Q31 FIR decimator structure.
    * @param[in]  pSrc       points to the block of input data.
    * @param[out] pDst       points to the block of output data
@@ -4109,7 +4349,6 @@ void riscv_correlate_fast_q15(
   const q15_t * pSrcB,
         uint32_t srcBLen,
         q15_t * pDst);
-
 
 /**
   @brief Correlation of Q15 sequences (fast version).
@@ -5177,7 +5416,7 @@ __STATIC_FORCEINLINE void riscv_inv_park_q31(
       /* Iniatilize output for below specified range as least output value of table */
       y = pYData[0];
     }
-    else if ((uint32_t)i >= S->nValues)
+    else if ((uint32_t)i >= (S->nValues - 1))
     {
       /* Iniatilize output for above specified range as last output value of table */
       y = pYData[S->nValues - 1];
@@ -6867,8 +7106,6 @@ riscv_status riscv_sqrt_q15(
 }
 #endif
 
-/* Compiler specific diagnostic adjustment */
-#pragma GCC diagnostic pop
 
 #endif /* _RISCV_MATH_H */
 
