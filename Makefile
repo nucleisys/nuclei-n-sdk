@@ -52,13 +52,18 @@ RISCV_ABI  := ilp32e
 endif
 
 ifeq ($(core_name),n305) 
-RISCV_ARCH := rv32imafdc
-RISCV_ABI  := ilp32d
+RISCV_ARCH := rv32imac
+RISCV_ABI  := ilp32
 endif
 
 ifeq ($(core_name),n307) 
 RISCV_ARCH := rv32imafdc
 RISCV_ABI  := ilp32d
+endif
+
+ifeq ($(core_name),n307f) 
+RISCV_ARCH := rv32imafc
+RISCV_ABI  := ilp32f
 endif
 
 PFLOAT     := 0
