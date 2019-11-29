@@ -129,7 +129,7 @@ const char * printf_instructions_msg= " \
 \n\
 This is printf function printed:  \n\
 \n\
-             !! Here We Go, Nuclei-N200 !! \n\
+             !! Here We Go, Nuclei-N !! \n\
 \n\
      ######    ###    #####   #####          #     #\n\
      #     #    #    #     # #     #         #     #\n\
@@ -272,6 +272,10 @@ int main(int argc, char **argv)
   printf ("%s","I got an input, it is\n\r");
   #else
   char c;
+
+  int a,b;
+  scanf("%d%d%d",&a,&b);
+  printf("a=%d,b=%d,c=%d\n",a,b);
   // Check for user input
   while(1){
     if (_getc(&c) != 0){
@@ -279,6 +283,7 @@ int main(int argc, char **argv)
        break;
     }
   }
+
   #endif
   _putc(c);
   printf ("\n\r");
