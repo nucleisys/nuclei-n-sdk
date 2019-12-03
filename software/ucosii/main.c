@@ -81,7 +81,7 @@ void task1(void *args)
 	for(;;)
 	{
 		cnt++;
-		printf("task1 is runing... %d\n",cnt);
+		printf("task1 is running... %d\n",cnt);
      GPIO_REG(GPIO_OUTPUT_VAL) ^= (0x1 << BLUE_LED_GPIO_OFFSET);
 		OSTimeDly(200);
 	}
@@ -93,7 +93,7 @@ void task2(void *args)
 	for(;;)
 	{
 		cnt++;
-		printf("task2 is runing... %d\n",cnt);
+		printf("task2 is running... %d\n",cnt);
      GPIO_REG(GPIO_OUTPUT_VAL) ^= (0x1 << GREEN_LED_GPIO_OFFSET);
 		OSTimeDly(100);
 	}
@@ -105,7 +105,7 @@ void task3(void *args)
 	for(;;)
 	{
 		cnt++;
-		printf("task3 is runing... %d\n",cnt);
+		printf("task3 is running... %d\n",cnt);
 		OSTimeDly(100);
 	}
 }
