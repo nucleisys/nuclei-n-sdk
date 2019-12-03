@@ -143,9 +143,9 @@ unsigned long ulSynchTrap(unsigned long mcause, unsigned long sp, unsigned long 
 		default:
 			write(1, "trap\n", 5);
             
-                printf("In trap handler, the mcause is %d\n",(mcause&0X00000fff) );
-                printf("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
-                printf("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
+               printf("In trap handler, the mcause is %d\n",(mcause&0X00000fff) );
+               printf("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
+               printf("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
               
 			_exit(mcause);
 	}
@@ -158,9 +158,30 @@ unsigned long ulSynchTrap(unsigned long mcause, unsigned long sp, unsigned long 
 }
 
 
+void set_msip_int()
+{
+  *(volatile uint8_t *) (TIMER_CTRL_ADDR + TIMER_MSIP) |=0x01;
+}
+
+void clear_msip_int()
+{
+  *(volatile uint8_t *) (TIMER_CTRL_ADDR + TIMER_MSIP) &= ~0x01;
+}
+
+
+unsigned long taskswitch( unsigned long sp, unsigned long arg1)	{
+	
+	//always yield from machine mode
+	//fix up mepc on 
+	unsigned long epc = read_csr(mepc);
+	vPortYield(sp,epc); //never returns
+
+	return sp;
+}
+
+
 void vPortEnterCritical( void )
 {
-	//printf("vPortEnterCritical\n");
 	#if USER_MODE_TASKS
 		ECALL(IRQ_DISABLE);
 	#else
@@ -257,7 +278,6 @@ void prvTaskExitError( void )
 /*-----------------------------------------------------------*/
 
 
-
 /*Entry Point for Machine Timer Interrupt Handler*/
 //Bob: add the function argument int_num
 
@@ -290,7 +310,7 @@ uint32_t vPortSysTickHandler(){
 /*-----------------------------------------------------------*/
 
 
-void vPortSetupTimer()	{
+void vPortSetupTimer(void)	{
     uint8_t mtime_intattr;
     // Set the machine timer
     //Bob: update it to TMR
@@ -306,10 +326,16 @@ void vPortSetupTimer()	{
     mtime_intattr|=ECLIC_INT_ATTR_SHV;
     eclic_set_intattr(ECLIC_INT_MTIP,mtime_intattr);
     eclic_enable_interrupt (ECLIC_INT_MTIP);
-		
+
     //eclic_set_nlbits(4);
     eclic_set_irq_lvl_abs(ECLIC_INT_MTIP,1);
     //set_csr(mstatus, MSTATUS_MIE);
+}
+
+void vPortSetupMSIP(void){
+		eclic_enable_interrupt (ECLIC_INT_MSIP);
+	  eclic_set_irq_lvl_abs(ECLIC_INT_MSIP,1);
+	  eclic_set_vmode(ECLIC_INT_MSIP);
 }
 /*-----------------------------------------------------------*/
 
@@ -317,6 +343,7 @@ void vPortSetupTimer()	{
 void vPortSetup()	{
 
 	vPortSetupTimer();
+	vPortSetupMSIP();
 	uxCriticalNesting = 0;
 }
 /*-----------------------------------------------------------*/

@@ -135,6 +135,10 @@ extern void vPortClearInterruptMask( int uxSavedStatusValue ); //in port.c
 	a2;							\
 })
 
+
+
+#define port_MSIPSET_BIT set_msip_int()
+
 #define IRQ_DISABLE 		20
 #define IRQ_ENABLE  		30
 #define PORT_YIELD  		40
@@ -145,7 +149,8 @@ extern void vPortClearInterruptMask( int uxSavedStatusValue ); //in port.c
 /* Scheduler utilities. */
 /* the return after the ECALL is VERY important */
 
-#define portYIELD() ECALL(PORT_YIELD);
+// #define portYIELD() ECALL(PORT_YIELD);
+#define portYIELD() port_MSIPSET_BIT;
 
 #define portYIELD_FROM_ISR(x)  if(x!=0)  {portYIELD();   printf("portYIELD \n");}
        
