@@ -273,9 +273,6 @@ int main(int argc, char **argv)
   #else
   char c;
 
-  int a,b;
-  scanf("%d%d%d",&a,&b);
-  printf("a=%d,b=%d,c=%d\n",a,b);
   // Check for user input
   while(1){
     if (_getc(&c) != 0){
