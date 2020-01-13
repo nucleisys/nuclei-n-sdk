@@ -1,7 +1,7 @@
 DEMO :=Demo
 DEMO_DIR :=${DEMO}
 TARGET = FreeRTOSv9.0.0
-CFLAGS += -Os -msave-restore  -fno-unroll-loops -flto
+CFLAGS += -O0 #-msave-restore  -fno-unroll-loops -flto
 
 BSP_BASE = ../../bsp
 
