@@ -169,11 +169,11 @@ void clear_msip_int()
 void taskswitch(void)
 {
 	 vPortRaiseMTH();
-	//set_csr(mstatus,MSTATUS_MIE);
+	set_csr(mstatus,MSTATUS_MIE);
 	
 	vTaskSwitchContext();
 
-//	clear_csr(mstatus,MSTATUS_MIE);
+	clear_csr(mstatus,MSTATUS_MIE);
 	vPortClearRaiseMTH();
 	
 }
