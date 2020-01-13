@@ -119,8 +119,8 @@ typedef unsigned long UBaseType_t;
 
 /* Architecture specifics. */
 extern void vPortYield(); //in port.c
-extern int xPortSetInterruptMask(); //in port.c
-extern void vPortClearInterruptMask( int uxSavedStatusValue ); //in port.c
+extern uint8_t xPortSetInterruptMask(); //in port.c
+extern void vPortClearInterruptMask( uint8_t uxSavedStatusValue ); //in port.c
 
 /*-----------------------------------------------------------*/
 /*System Calls												 */
@@ -161,12 +161,13 @@ extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
 #define portSET_INTERRUPT_MASK_FROM_ISR()       xPortSetInterruptMask()
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedStatusValue )       vPortClearInterruptMask( uxSavedStatusValue )
-#define portDISABLE_INTERRUPTS()	        clear_csr(mstatus,MSTATUS_MIE);
-#define portENABLE_INTERRUPTS()			set_csr(mstatus, MSTATUS_MIE);
+#define portDISABLE_INTERRUPTS()	      vPortRaiseMTH()// clear_csr(mstatus,MSTATUS_MIE);
+#define portENABLE_INTERRUPTS()			vPortClearRaiseMTH()//set_csr(mstatus, MSTATUS_MIE);
 #define portENTER_CRITICAL()			vPortEnterCritical()
-#define portEXIT_CRITICAL()			vPortExitCritical()
+#define portEXIT_CRITICAL()			    vPortExitCritical()
 
 /*-----------------------------------------------------------*/
+
 
 /* Task function macros as described on the FreeRTOS.org WEB site.  These are
 not necessary for to use this port.  They are defined so the common demo files

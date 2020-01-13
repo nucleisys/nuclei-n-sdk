@@ -72,11 +72,10 @@
 */
 
 //#include "drivers/func.h"
-#include "soc/drivers/soc.h"
-#include "soc/drivers/board.h"
 #include "drivers/riscv_encoding.h"
 #include "drivers/timer.h"
 #include "drivers/eclic.h"
+#include "FreeRTOSConfig.h"
 
 //#include "portmacro.h"
 
@@ -88,7 +87,7 @@
 #define INT_MASK 0x7FFFFFFF
 
 .section      .text.entry
-.align 4
+.align 4   
 
 .global portSAVE_CONTEXT
 .global portRESTORE_CONTEXT
@@ -178,45 +177,6 @@
 	#endif
 .endm
 
-/* Macro for saving task context */
-.macro pushREGFILE_Callee
-
-	/* Save Context */
-	//STORE	x1, 1 * REGBYTES(sp)
-	STORE	x2, 2 * REGBYTES(sp)
-	////STORE	x3, 3 * REGBYTES(sp)
-	STORE	x4, 4 * REGBYTES(sp)
-//	STORE	x5, 5 * REGBYTES(sp)
-	//STORE	x6, 6 * REGBYTES(sp)
-	//STORE	x7, 7 * REGBYTES(sp)
-	STORE	x8, 8 * REGBYTES(sp)
-	STORE	x9, 9 * REGBYTES(sp)
-	//STORE	x10, 10 * REGBYTES(sp)
-	//STORE	x11, 11 * REGBYTES(sp)
-	//STORE	x12, 12 * REGBYTES(sp)
-	//STORE	x13, 13 * REGBYTES(sp)
-	//STORE	x14, 14 * REGBYTES(sp)
-	//STORE	x15, 15 * REGBYTES(sp)
-	//STORE	x16, 16 * REGBYTES(sp)
-	//STORE	x17, 17 * REGBYTES(sp)
-#ifndef __riscv_32e
-	STORE	x18, 18 * REGBYTES(sp)
-	STORE	x19, 19 * REGBYTES(sp)
-	STORE	x20, 20 * REGBYTES(sp)
-	STORE	x21, 21 * REGBYTES(sp)
-	STORE	x22, 22 * REGBYTES(sp)
-	STORE	x23, 23 * REGBYTES(sp)
-	STORE	x24, 24 * REGBYTES(sp)
-	STORE	x25, 25 * REGBYTES(sp)
-	STORE	x26, 26 * REGBYTES(sp)
-	STORE	x27, 27 * REGBYTES(sp)
-	//STORE	x28, 28 * REGBYTES(sp)
-	//STORE	x29, 29 * REGBYTES(sp)
-	//STORE	x30, 30 * REGBYTES(sp)
-	//STORE	x31, 31 * REGBYTES(sp)
-#endif
-.endm
-
 
 /*saves mstatus and tcb	*/
 .macro portSAVE_CONTEXT_EXCP
@@ -227,6 +187,9 @@
 
 	csrr t0, CSR_MSUBM  
   	STORE t0,  34*REGBYTES(sp)
+
+		csrr t0, CSR_MEPC  
+  	STORE t0,  33*REGBYTES(sp)
 
 	
 	/* Store current stackpointer in task control block (TCB) */
@@ -275,44 +238,7 @@
 	addi	sp, sp, REGBYTES * 36
 .endm
 
-.macro popREGFILE_Caller
 
-	/* Restore registers,
-	Skip global pointer because that does not change */
-	LOAD	x1, 1 * REGBYTES(sp)
-	////LOAD 	x3, 3 * REGBYTES(sp)
-	//LOAD	x4, 4 * REGBYTES(sp)
-	LOAD	x5, 5 * REGBYTES(sp)
-	LOAD	x6, 6 * REGBYTES(sp)
-	LOAD	x7, 7 * REGBYTES(sp)
-	//LOAD	x8, 8 * REGBYTES(sp)
-	//LOAD	x9, 9 * REGBYTES(sp)
-	LOAD	x10, 10 * REGBYTES(sp)
-	LOAD	x11, 11 * REGBYTES(sp)
-	LOAD	x12, 12 * REGBYTES(sp)
-	LOAD	x13, 13 * REGBYTES(sp)
-	LOAD	x14, 14 * REGBYTES(sp)
-	LOAD	x15, 15 * REGBYTES(sp)
-#ifndef __riscv_32e
-	LOAD	x16, 16 * REGBYTES(sp)
-	LOAD	x17, 17 * REGBYTES(sp)
-	//LOAD	x18, 18 * REGBYTES(sp)
-	//LOAD	x19, 19 * REGBYTES(sp)
-	//LOAD	x20, 20 * REGBYTES(sp)
-	//LOAD	x21, 21 * REGBYTES(sp)
-	//LOAD	x22, 22 * REGBYTES(sp)
-	//LOAD	x23, 23 * REGBYTES(sp)
-	//LOAD	x24, 24 * REGBYTES(sp)
-	//LOAD	x25, 25 * REGBYTES(sp)
-	//LOAD	x26, 26 * REGBYTES(sp)
-	//LOAD	x27, 27 * REGBYTES(sp)
-	LOAD	x28, 28 * REGBYTES(sp)
-	LOAD	x29, 29 * REGBYTES(sp)
-	LOAD	x30, 30 * REGBYTES(sp)
-	LOAD	x31, 31 * REGBYTES(sp)
-#endif
-	addi	sp, sp, REGBYTES * 36
-.endm
 ###############################################
 
 ###############################################
@@ -384,25 +310,25 @@
 
 ###############################################
 
-/* Interrupt entry point */
-.global trap_entry
-.align 6
-trap_entry:
-	/* Check for interrupt */
-	pushREGFILE
-	csrr	a0, mcause
-    	//Bob: we dont need to check interrupt here because N200 have seperated entry to IRQ
-	//blt		a0,zero,interrupt
+# /* Interrupt entry point */
+# .global trap_entry
+# .align 6
+# trap_entry:
+# 	/* Check for interrupt */
+# 	pushREGFILE
+# 	csrr	a0, mcause
+#     	//Bob: we dont need to check interrupt here because N200 have seperated entry to IRQ
+# 	//blt		a0,zero,interrupt
 
-	/* synchronous interrupt*/
-	/* pass mcause in a0 */
-	/* pass sp in a1 */
-	mv a1,sp
-	jal ulSynchTrap
-	/*  adjust stack pointer back to where it was prior to ulSynchTrap  */
-	mv		sp,a0
-	popREGFILE
-	mret
+# 	/* synchronous interrupt*/
+# 	/* pass mcause in a0 */
+# 	/* pass sp in a1 */
+# 	mv a1,sp
+# 	jal ulSynchTrap
+# 	/*  adjust stack pointer back to where it was prior to ulSynchTrap  */
+# 	mv		sp,a0
+# 	popREGFILE
+# 	mret
 
 ###############################################
 ###############################################
@@ -410,42 +336,42 @@ trap_entry:
 /* async interrupt, this function is called */
 //Bob: Rename this to irq_entry to make it override the weak symbol from BSPs entry.S
 //interrupt:
-.align 2
-.global irq_entry
-irq_entry: // -------------> This label will be set to MTVT2 register
-  	// Allocate the stack space
-  	pushREGFILE
-	csrr	t0, CSR_MSTATUS	
-	STORE	t0, 32 * REGBYTES(sp)
-  	csrr t0,   CSR_MEPC
-  	STORE t0,  33*REGBYTES(sp)
-  	csrr t0,   CSR_MSUBM
-  	STORE t0,  34*REGBYTES(sp)
-	csrr t0,   CSR_MCAUSE
-  	STORE t0,  35*REGBYTES(sp)
+# .align 2
+# .global irq_entry
+# irq_entry: // -------------> This label will be set to MTVT2 register
+#   	// Allocate the stack space
+#   	pushREGFILE
+# 	csrr	t0, CSR_MSTATUS	
+# 	STORE	t0, 32 * REGBYTES(sp)
+#   	csrr t0,   CSR_MEPC
+#   	STORE t0,  33*REGBYTES(sp)
+#   	csrr t0,   CSR_MSUBM
+#   	STORE t0,  34*REGBYTES(sp)
+# 	csrr t0,   CSR_MCAUSE
+#   	STORE t0,  35*REGBYTES(sp)
 	
 	
-int_loop:             // 3 instructions in pending-interrupt service loop.
-  	csrrw ra, CSR_JALMNXTI, ra    
+# int_loop:             // 3 instructions in pending-interrupt service loop.
+#   	csrrw ra, CSR_JALMNXTI, ra    
         
-  	csrrsi a0, CSR_MNXTI, MSTATUS_MIE   // Claim any pending interrupt at level > mcause.pil 
-  	bnez a0, int_loop   // Loop to service any interrupt. 
+#   //	csrrsi a0, CSR_MNXTI, MSTATUS_MIE   // Claim any pending interrupt at level > mcause.pil 
+#   //	bnez a0, int_loop   // Loop to service any interrupt. 
 
-  	#---- Critical section with interrupts disabled -----------------------
-  	DISABLE_MIE # Disable interrupts
+#   	#---- Critical section with interrupts disabled -----------------------
+#   	DISABLE_MIE # Disable interrupts
   
  	
-	LOAD t0,  35*REGBYTES(sp)
-  	csrw CSR_MCAUSE, t0   
-	LOAD t0,  34*REGBYTES(sp)
-  	csrw CSR_MSUBM, t0 
-	LOAD t0,  33*REGBYTES(sp)
-  	csrw CSR_MEPC, t0  
-  	LOAD t0,  32*REGBYTES(sp)
- 	csrw CSR_MSTATUS, t0 
+# 	LOAD t0,  35*REGBYTES(sp)
+#   	csrw CSR_MCAUSE, t0   
+# 	LOAD t0,  34*REGBYTES(sp)
+#   	csrw CSR_MSUBM, t0 
+# 	LOAD t0,  33*REGBYTES(sp)
+#   	csrw CSR_MEPC, t0  
+#   	LOAD t0,  32*REGBYTES(sp)
+#  	csrw CSR_MSTATUS, t0 
 
-  	popREGFILE
-  	mret
+#   	popREGFILE
+#   	mret
 
 .align 2
 .globl MTIME_HANDLER
@@ -453,10 +379,16 @@ MTIME_HANDLER:
   	pushREGFILE   
 	portSAVE_CONTEXT_IRQ  
 	
-	csrs CSR_MSTATUS, MSTATUS_MIE  
+	# li t0 ,  ECLIC_ADDR_BASE+ECLIC_MTH_OFFSET 
+	# li t1 , (configMAX_SYSCALL_INTERRUPT_PRIORITY<<5|0x1f)
+	# sb t1, 0(t0)
+#	csrs CSR_MSTATUS, MSTATUS_MIE  
 	jal		vPortSysTickHandler
+ # csrc CSR_MSTATUS, MSTATUS_MIE 
+	# li t0 ,  ECLIC_ADDR_BASE+ECLIC_MTH_OFFSET 
+	# li t1 ,0
+	# sb t1, 0(t0)
 	 
-
 	portRESTORE_CONTEXT_IRQ
 	popREGFILE
 	
@@ -467,46 +399,36 @@ MTIME_HANDLER:
 
 MSIP_HANDLER:
 
-	
 	/* Check for interrupt */
 	pushREGFILE
-	portSAVE_CONTEXT_IRQ
+	//portSAVE_CONTEXT_IRQ
+	portSAVE_CONTEXT_EXCP
+  call clear_msip_int
 
-	/* pass sp in a0 */
-	mv a0,sp
-	csrs CSR_MSTATUS, MSTATUS_MIE
-	call clear_msip_int
-	jal taskswitch
-	csrc CSR_MSTATUS, MSTATUS_MIE 
-	/*  adjust stack pointer back to where it was prior to ulSynchTrap  */
-//	mv		sp,a0
-	portRESTORE_CONTEXT_IRQ
+	# li t0 ,  ECLIC_ADDR_BASE+ECLIC_MTH_OFFSET 
+	# li t1 , (configMAX_SYSCALL_INTERRUPT_PRIORITY<<5|0x1f)
+	# sb t1, 0(t0)
+	#csrs CSR_MSTATUS, MSTATUS_MIE
+	jal  vTaskSwitchContext
+	#csrc CSR_MSTATUS, MSTATUS_MIE
+	# li t0 ,  ECLIC_ADDR_BASE+ECLIC_MTH_OFFSET 
+	# li t1 ,0
+	# sb t1, 0(t0)
+
+	portRESTORE_CONTEXT_EXCP
 	popREGFILE
 
 	mret
 
 xPortStartScheduler:
 	jal		vPortSetup
-	portRESTORE_CONTEXT_EXCP 
+	portRESTORE_CONTEXT_EXCP
 	
 	popREGFILE
+
 	
 	mret
 
-
-.align 6
-vPortYield:
-	mv		sp,a0
-	
-	portSAVE_CONTEXT_EXCP
-
-	STORE	a1, 33 * REGBYTES(sp)
-	jal		vTaskSwitchContext
-
-	portRESTORE_CONTEXT_EXCP
-	popREGFILE  
-
-	mret
 
 vPortEndScheduler:
 1:
