@@ -141,7 +141,7 @@ static void vExampleTimerCallback( TimerHandle_t xTimer );
 void config_eclic_irqs (){
   //time_init   in port.c
 
- eclic_enable_interrupt (ECLIC_INT_DEVICE_BUTTON_1);
+  eclic_enable_interrupt (ECLIC_INT_DEVICE_BUTTON_1);
   eclic_enable_interrupt (ECLIC_INT_DEVICE_BUTTON_2);
 
 
@@ -151,8 +151,6 @@ void config_eclic_irqs (){
   eclic_set_irq_lvl_abs(ECLIC_INT_DEVICE_BUTTON_1, 2);
   eclic_set_irq_lvl_abs(ECLIC_INT_DEVICE_BUTTON_2, 3);
 
-  // The MTIME using Vector-Mode
-  eclic_set_vmode(ECLIC_INT_MTIP);
 
  } 
 
@@ -216,7 +214,7 @@ int main(void)
     }
     xTaskCreate((TaskFunction_t )start_task,            //ÈÎÎñº¯Êý
                 (const char*    )"start_task",          //ÈÎÎñÃû³Æ
-                (uint16_t       )512,        //ÈÎÎñ¶ÑÕ»´óÐ¡
+                (uint16_t       )256,        //ÈÎÎñ¶ÑÕ»´óÐ¡
                 (void*          )NULL,                  //´«µÝ¸øÈÎÎñº¯ÊýµÄ²ÎÊý
                 (UBaseType_t    )2,       //ÈÎÎñÓÅÏÈ¼¶
                 (TaskHandle_t*  )&StartTask_Handler);   //ÈÎÎñ¾ä±ú        
@@ -224,11 +222,10 @@ int main(void)
 
      xTaskCreate((TaskFunction_t )start_task2,            //ÈÎÎñº¯Êý
                 (const char*    )"start_task2",          //ÈÎÎñÃû³Æ
-                (uint16_t       )512,        //ÈÎÎñ¶ÑÕ»´óÐ¡
+                (uint16_t       )256,        //ÈÎÎñ¶ÑÕ»´óÐ¡
                 (void*          )NULL,                  //´«µÝ¸øÈÎÎñº¯ÊýµÄ²ÎÊý
                 (UBaseType_t    )2,       //ÈÎÎñÓÅÏÈ¼¶
                 (TaskHandle_t*  )&StartTask2_Handler); 
- 
 
  
    xExampleSoftwareTimer = xTimerCreate(     
@@ -246,7 +243,7 @@ int main(void)
     printf("Before StartScheduler\n");//Bob: I added it to here to easy analysis
     
     vTaskStartScheduler();
-   
+  
     printf("post   ok \n");
   
     for( ;; )
@@ -258,6 +255,8 @@ int main(void)
 
 void start_task(void *pvParameters)
 {
+
+    
     printf("task_1\n");
 
 	uint32_t task1_num=0;
@@ -265,14 +264,15 @@ void start_task(void *pvParameters)
 	{
 		task1_num++;					
 		printf("task_1 is running: %d*************\r\n",task1_num);
-		wait_seconds(1);			// Delay 1s 
-        //vTaskDelay(200);
+	//	wait_seconds(1);			// Delay 1s 
+        //vTaskDelay(100);
     }
     
 }   
 
 void start_task2(void *pvParameters)
 {
+
     printf("task_2\n");
 
     uint32_t task2_num=0;
@@ -280,11 +280,11 @@ void start_task2(void *pvParameters)
 	{
 		task2_num++;					
 		printf("task_2 is running: %d#############\r\n",task2_num);
-		wait_seconds(1);				// Delay 1s 
-      //  vTaskDelay(200);
+		//wait_seconds(1);				// Delay 1s 
+       //vTaskDelay(100);
 
     }
-}   
+}    
 
 
 static void vExampleTimerCallback( TimerHandle_t xTimer )
@@ -302,11 +302,11 @@ static void vExampleTimerCallback( TimerHandle_t xTimer )
 
 void BUTTON_1_HANDLER(void) {   
 
-    printf ("%s","----Begin button1 handler\n");
+   printf ("%s","----Begin button1 handler\n");
     GPIO_REG(GPIO_OUTPUT_VAL) ^= (0x1 << RED_LED_GPIO_OFFSET);
     printf ("%s","----red LED off or on\n");
-    wait_seconds(1);
-    printf ("%s","----End button1 handler\n");
+   wait_seconds(1);
+   printf ("%s","----End button1 handler\n");
 
     GPIO_REG(GPIO_RISE_IP) = (0x1 << BUTTON_1_GPIO_OFFSET);  
 };
@@ -314,7 +314,7 @@ void BUTTON_2_HANDLER(void) {
  
     printf ("%s","--------Begin button2 handler\n");
     printf ("%s","--------Higher level\n");
-    wait_seconds(1);
+   wait_seconds(1);
     printf ("%s","--------End button2 handler\n");    
 
     GPIO_REG(GPIO_RISE_IP) = (0x1 << BUTTON_2_GPIO_OFFSET);
