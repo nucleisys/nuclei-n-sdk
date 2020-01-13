@@ -409,7 +409,7 @@ MSIP_HANDLER:
 	# li t1 , (configMAX_SYSCALL_INTERRUPT_PRIORITY<<5|0x1f)
 	# sb t1, 0(t0)
 	#csrs CSR_MSTATUS, MSTATUS_MIE
-	jal  vTaskSwitchContext
+	jal  taskswitch
 	#csrc CSR_MSTATUS, MSTATUS_MIE
 	# li t0 ,  ECLIC_ADDR_BASE+ECLIC_MTH_OFFSET 
 	# li t1 ,0
