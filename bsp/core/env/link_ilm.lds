@@ -164,7 +164,7 @@ SECTIONS
     PROVIDE( _heap_end = . );
     . = __int_stack_size;
     PROVIDE( _int_sp = . );
-        . = __stack_size;
+    . = . + __stack_size;
     PROVIDE( _sp = . );
   } >ram AT>ram 
 
