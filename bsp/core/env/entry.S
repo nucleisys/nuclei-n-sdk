@@ -22,6 +22,7 @@
 ###############################################
 #Save caller registers
 .macro SAVE_CONTEXT
+  csrrw sp,CSR_MSCRATCHCSWL,sp
 
 #ifdef __riscv_flen
   #if (__riscv_flen==64 )
@@ -143,6 +144,8 @@
 // De-allocate the stack space
  addi sp, sp, 20*REGBYTES
 #endif
+
+csrrw sp,CSR_MSCRATCHCSWL,sp
 .endm
 
 ###############################################

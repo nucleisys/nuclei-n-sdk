@@ -12,6 +12,7 @@ MEMORY
 SECTIONS
 {
   __stack_size = DEFINED(__stack_size) ? __stack_size : 2K;
+  __int_stack_size = DEFINED(__int_stack_size) ? __int_stack_size : 1K;
 
   .init           :
   {
@@ -157,10 +158,12 @@ SECTIONS
   PROVIDE( _end = . );
   PROVIDE( end = . );
 
-  .stack ORIGIN(ram) + LENGTH(ram) - __stack_size :
+  .stack ORIGIN(ram) + LENGTH(ram) - __stack_size - __int_stack_size :
   {
     PROVIDE( _heap_end = . );
-    . = __stack_size;
+    . = __int_stack_size;
+    PROVIDE( _int_sp = . );
+        . = __stack_size;
     PROVIDE( _sp = . );
   } >ram AT>ram 
 }

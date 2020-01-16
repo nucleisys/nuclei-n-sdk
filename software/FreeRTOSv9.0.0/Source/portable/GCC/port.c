@@ -110,52 +110,6 @@ static void prvTaskExitError( void );
 
 /*-----------------------------------------------------------*/
 
-/* System Call Trap */
-//ECALL macro stores argument in a2
-unsigned long ulSynchTrap(unsigned long mcause, unsigned long sp, unsigned long arg1)	{
-	
-	//switch(mcause&0X00000fff)	{
-		//on User and Machine ECALL, handler the request
-		// case 8:
-		// case 11:
-		// 	if(arg1==IRQ_DISABLE)	{
-		// 		//zero out mstatus.mpie
-		// 		clear_csr(mstatus,MSTATUS_MPIE);
-      
-		// 	} else if(arg1==IRQ_ENABLE)	{
-		// 		//set mstatus.mpie
-		// 		set_csr(mstatus,MSTATUS_MPIE);
-
-		// 	} else if(arg1==PORT_YIELD)		{
-		// 		//always yield from machine mode
-		// 		//fix up mepc on sync trap
-		// 		unsigned long epc = read_csr(mepc);
-		// 		vPortYield(sp,epc+4); //never returns
-				
-		// 	} else if(arg1==PORT_YIELD_TO_RA)	{
-			
-		// 		vPortYield(sp,(*(unsigned long*)(sp+1*sizeof(sp)))); //never returns
-		// 	}
-			
-		//	break;
-	//	default:
-			write(1, "trap\n", 5);
-            
-               printf("In trap handler, the mcause is %d\n",(mcause&0X00000fff) );
-               printf("In trap handler, the mepc is 0x%x\n", read_csr(mepc));
-               printf("In trap handler, the mtval is 0x%x\n", read_csr(mbadaddr));
-              
-			_exit(mcause);
-	//}
-
-	//fix mepc and return 
-	//unsigned long epc = read_csr(mepc);
-
-//	write_csr(mepc,epc+4);
-//	return sp;
-}
-
-
 void set_msip_int()
 {
   *(volatile uint8_t *) (TIMER_CTRL_ADDR + TIMER_MSIP) |=0x01;
@@ -168,26 +122,24 @@ void clear_msip_int()
 
 void taskswitch(void)
 {
-	 vPortRaiseMTH();
+	uint32_t mcause = read_csr(mcause);
+  uint32_t msubm = read_csr(0x7c4);
+	uint32_t mepc = read_csr(mepc);
+
+	vPortRaiseMTH();
 	set_csr(mstatus,MSTATUS_MIE);
 	
 	vTaskSwitchContext();
 
+	
 	clear_csr(mstatus,MSTATUS_MIE);
 	vPortClearRaiseMTH();
 	
-}
 
-
-void  vPortTaskSwitch( unsigned long sp, unsigned long arg1)	{
+	write_csr(0x7c4, msubm);
+  write_csr(mcause, mcause); 
+	write_csr(mepc, mepc);
 	
-	//always yield from machine mode
-	//fix up mepc on 
-//	clear_csr(mstatus,MSTATUS_MIE);
-  //uint32_t mask = xPortSetInterruptMask();
-	unsigned long epc = read_csr(mepc);
-//	vPortClearInterruptMask(mask);
-	vPortYield(sp,epc); //never returns
 }
 
 
@@ -310,12 +262,16 @@ void vPortSysTickHandler(){
 
   volatile uint64_t * mtime       = (uint64_t*) (TIMER_CTRL_ADDR + TIMER_MTIME);
   volatile uint64_t * mtimecmp    = (uint64_t*) (TIMER_CTRL_ADDR + TIMER_MTIMECMP);
-	
-	vPortEnterCritical();
+
+	uint32_t mcause = read_csr(mcause);
+  uint32_t msubm = read_csr(0x7c4);
+	uint32_t mepc = read_csr(mepc);
+
+	vPortEnterCritical()	;
 	set_csr(mstatus,MSTATUS_MIE);
+	
 	*mtime = (uint64_t) 0x00;
   volatile uint64_t  now = *mtime;
-
 
 	then = now + (configRTC_CLOCK_HZ / configTICK_RATE_HZ);
 
@@ -325,41 +281,45 @@ void vPortSysTickHandler(){
 	if( xTaskIncrementTick() != pdFALSE )
 	{
 		portYIELD();
-		//vTaskSwitchContext();
 	}
+	
 	clear_csr(mstatus,MSTATUS_MIE);
-  vPortExitCritical();
+	vPortExitCritical();
+	write_csr(0x7c4, msubm);
+  write_csr(mcause, mcause); 
+	write_csr(mepc, mepc);
+	
 	}
 /*-----------------------------------------------------------*/
 
 
 void vPortSetupTimer(void)	{
-    uint8_t mtime_intattr;
+    //uint8_t mtime_intattr;
     // Set the machine timer
     //Bob: update it to TMR
     //volatile uint64_t * mtime       = (uint64_t*) (CLINT_CTRL_ADDR + CLINT_MTIME);
     //volatile uint64_t * mtimecmp    = (uint64_t*) (CLINT_CTRL_ADDR + CLINT_MTIMECMP);
     volatile uint64_t * mtime       = (uint64_t*) (TIMER_CTRL_ADDR + TIMER_MTIME);
     volatile uint64_t * mtimecmp    = (uint64_t*) (TIMER_CTRL_ADDR + TIMER_MTIMECMP);
-    uint64_t now = *mtime;
-    uint64_t then = now + (configRTC_CLOCK_HZ / configTICK_RATE_HZ);
+	 // volatile uint32_t * mtimectl    = (uint32_t*) (TIMER_CTRL_ADDR + TIMER_CTL);
+	//	 *mtimectl = 0x02;
+     *mtime = 0x0;
+    uint64_t then = (configRTC_CLOCK_HZ / configTICK_RATE_HZ);
     *mtimecmp = then;
-
+		
     // mtime_intattr=eclic_get_intattr (ECLIC_INT_MTIP);
     // mtime_intattr|=ECLIC_INT_ATTR_SHV;
     // eclic_set_intattr(ECLIC_INT_MTIP,mtime_intattr);
     // eclic_enable_interrupt (ECLIC_INT_MTIP);
 
-    // //eclic_set_nlbits(4);
+    //eclic_set_nlbits(4);
     // eclic_set_irq_lvl_abs(ECLIC_INT_MTIP,1);
-    //set_csr(mstatus, MSTATUS_MIE);
+    // set_csr(mstatus, MSTATUS_MIE);
 
  // The MTIME using Vector-Mode
  		eclic_enable_interrupt (ECLIC_INT_MTIP);
 	  eclic_set_irq_lvl_abs(ECLIC_INT_MTIP,1);
     eclic_set_vmode(ECLIC_INT_MTIP);
-
-
 }
 
 void vPortSetupMSIP(void){
@@ -374,6 +334,7 @@ void vPortSetup()	{
 
 	vPortSetupTimer();
 	vPortSetupMSIP();
+	vPortClearRaiseMTH();
 	uxCriticalNesting = 0;
 }
 /*-----------------------------------------------------------*/

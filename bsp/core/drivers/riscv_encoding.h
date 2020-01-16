@@ -888,6 +888,9 @@
 #define CSR_MHPMCOUNTER30H 0xb9e
 #define CSR_MHPMCOUNTER31H 0xb9f
 
+#define CSR_MSCRATCHCSWL 0x349
+#define CSR_MSCRATCH     0x340
+
 
 #define CSR_MTVT               0x307
 #define CSR_MNXTI              0x345

@@ -26,6 +26,10 @@ _start:
     	csrw CSR_MTVEC, t0
 
 
+		la t0,_int_sp
+		csrw CSR_MSCRATCH ,t0
+
+
 #ifdef __riscv_flen
 	/* Enable FPU */
 	li t0, MSTATUS_FS
@@ -38,7 +42,7 @@ _start:
 	la gp, __global_pointer$
     	.option pop
 	la sp, _sp
-
+	
 	/* Bob: Load code section from flash to ILM */
 	la a0, _ilm_lma
 	la a1, _ilm

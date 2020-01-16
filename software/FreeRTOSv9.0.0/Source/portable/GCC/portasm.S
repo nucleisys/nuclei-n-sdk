@@ -99,11 +99,11 @@
 /* Macro for saving task context */
 .macro pushREGFILE
 	/* make room in stack */
-	addi	sp, sp, -REGBYTES * 36
+	addi	sp, sp, -REGBYTES * 34
 
 	/* Save Context */
 	STORE	x1, 1 * REGBYTES(sp)
-	STORE	x2, 2 * REGBYTES(sp)
+	//STORE	x2, 2 * REGBYTES(sp)
 	//STORE	x3, 3 * REGBYTES(sp)
 	STORE	x4, 4 * REGBYTES(sp)
 	STORE	x5, 5 * REGBYTES(sp)
@@ -135,66 +135,6 @@
 	STORE	x30, 30 * REGBYTES(sp)
 	STORE	x31, 31 * REGBYTES(sp)
 #endif
-.endm
-
-.macro pushREGFILE_Caller
-	/* make room in stack */
-	addi	sp, sp, -REGBYTES * 36
-
-	/* Save Context */
-	STORE	x1, 1 * REGBYTES(sp)
-	//STORE	x2, 2 * REGBYTES(sp)
-	////STORE	x3, 3 * REGBYTES(sp)
-	//STORE	x4, 4 * REGBYTES(sp)
-	STORE	x5, 5 * REGBYTES(sp)
-	STORE	x6, 6 * REGBYTES(sp)
-	STORE	x7, 7 * REGBYTES(sp)
-	//STORE	x8, 8 * REGBYTES(sp)
-	//STORE	x9, 9 * REGBYTES(sp)
-	STORE	x10, 10 * REGBYTES(sp)
-	STORE	x11, 11 * REGBYTES(sp)
-	STORE	x12, 12 * REGBYTES(sp)
-	STORE	x13, 13 * REGBYTES(sp)
-	STORE	x14, 14 * REGBYTES(sp)
-	STORE	x15, 15 * REGBYTES(sp)
-#ifndef  __riscv_32e
-	STORE	x16, 16 * REGBYTES(sp)
-	STORE	x17, 17 * REGBYTES(sp)
-	//STORE	x18, 18 * REGBYTES(sp)
-	//STORE	x19, 19 * REGBYTES(sp)
-	//STORE	x20, 20 * REGBYTES(sp)
-	//STORE	x21, 21 * REGBYTES(sp)
-	//STORE	x22, 22 * REGBYTES(sp)
-	//STORE	x23, 23 * REGBYTES(sp)
-	//STORE	x24, 24 * REGBYTES(sp)
-	//STORE	x25, 25 * REGBYTES(sp)
-	//STORE	x26, 26 * REGBYTES(sp)
-	//STORE	x27, 27 * REGBYTES(sp)
-	STORE	x28, 28 * REGBYTES(sp)
-	STORE	x29, 29 * REGBYTES(sp)
-	STORE	x30, 30 * REGBYTES(sp)
-	STORE	x31, 31 * REGBYTES(sp)
-	#endif
-.endm
-
-
-/*saves mstatus and tcb	*/
-.macro portSAVE_CONTEXT_EXCP
-	.global	pxCurrentTCB
-	/* Store mstatus */
-	csrr	t0, CSR_MSTATUS	//pointer
-	STORE	t0, 32 * REGBYTES(sp)
-
-	csrr t0, CSR_MSUBM  
-  	STORE t0,  34*REGBYTES(sp)
-
-		csrr t0, CSR_MEPC  
-  	STORE t0,  33*REGBYTES(sp)
-
-	
-	/* Store current stackpointer in task control block (TCB) */
-	LOAD	t0, pxCurrentTCB	//pointer
-	STORE	sp, 0x0(t0)
 .endm
 
 
@@ -235,7 +175,7 @@
 	LOAD	x30, 30 * REGBYTES(sp)
 	LOAD	x31, 31 * REGBYTES(sp)
 #endif
-	addi	sp, sp, REGBYTES * 36
+	addi	sp, sp, REGBYTES * 34
 .endm
 
 
@@ -249,33 +189,37 @@
 	/* Load stack pointer from the current TCB */
 	LOAD	sp, pxCurrentTCB
 	LOAD	sp, 0x0(sp)
-	/* Load task program counter */
-	LOAD t0,  34*REGBYTES(sp)
-  	csrw CSR_MSUBM, t0   
+  
 	LOAD t0,  33*REGBYTES(sp)
   	csrw CSR_MEPC, t0  
-  	LOAD t0,  32*REGBYTES(sp)
+  LOAD t0,  32*REGBYTES(sp)
   	csrw CSR_MSTATUS, t0 
 .endm
 
 
+/*saves mstatus and tcb	*/
+.macro portSAVE_CONTEXT_EXCP
+	.global	pxCurrentTCB
+
+	/* Store mstatus */
+	  csrr	t0, CSR_MSTATUS	//pointer
+	STORE	t0, 32 * REGBYTES(sp)
+		csrr t0, CSR_MEPC  
+  STORE t0,  33*REGBYTES(sp)
+
+	
+	/* Store current stackpointer in task control block (TCB) */
+	LOAD	t0, pxCurrentTCB	//pointer
+	STORE	sp, 0x0(t0)
+.endm
 
 /*saves istatus and tcb	*/
 .macro portSAVE_CONTEXT_IRQ
-	.global	pxCurrentTCB
+//	.global	pxCurrentTCB
 	/* Store status */
 	csrr t0, CSR_MSTATUS  
   	STORE t0,  32*REGBYTES(sp)
-	csrr t0,   CSR_MEPC
-	STORE t0,  33*REGBYTES(sp)
-  	csrr t0,   CSR_MSUBM
-  	STORE t0,  34*REGBYTES(sp)
-	csrr t0,  CSR_MCAUSE 
-  	STORE t0,  35*REGBYTES(sp)
 
-	/* Store current stackpointer in task control block (TCB) */
-//	LOAD	t0, pxCurrentTCB	//pointer
-//	STORE	sp, 0x0(t0)
 .endm
 
 
@@ -283,19 +227,6 @@
  /*restore istatus/ipc and tcb	*/
 .macro portRESTORE_CONTEXT_IRQ
 	.global	pxCurrentTCB
-	/* Load stack pointer from the current TCB */
-//	LOAD	sp, pxCurrentTCB
-//	LOAD	sp, 0x0(sp)
-	#---- Critical section with interrupts disabled -----------------------
-   	# Disable interrupts 
-	
- 	
-	LOAD t0,  35*REGBYTES(sp)
-  	csrw  CSR_MCAUSE, t0   
-	LOAD t0,  34*REGBYTES(sp)
-  	csrw CSR_MSUBM, t0 
-	LOAD t0,  33*REGBYTES(sp)
-  	csrw CSR_MEPC, t0  
   	LOAD t0,  32*REGBYTES(sp)
   	csrw CSR_MSTATUS, t0 
 .endm  
@@ -307,71 +238,7 @@
   	csrc CSR_MSTATUS, MSTATUS_MIE  
 .endm
 
-
 ###############################################
-
-# /* Interrupt entry point */
-# .global trap_entry
-# .align 6
-# trap_entry:
-# 	/* Check for interrupt */
-# 	pushREGFILE
-# 	csrr	a0, mcause
-#     	//Bob: we dont need to check interrupt here because N200 have seperated entry to IRQ
-# 	//blt		a0,zero,interrupt
-
-# 	/* synchronous interrupt*/
-# 	/* pass mcause in a0 */
-# 	/* pass sp in a1 */
-# 	mv a1,sp
-# 	jal ulSynchTrap
-# 	/*  adjust stack pointer back to where it was prior to ulSynchTrap  */
-# 	mv		sp,a0
-# 	popREGFILE
-# 	mret
-
-###############################################
-###############################################
-
-/* async interrupt, this function is called */
-//Bob: Rename this to irq_entry to make it override the weak symbol from BSPs entry.S
-//interrupt:
-# .align 2
-# .global irq_entry
-# irq_entry: // -------------> This label will be set to MTVT2 register
-#   	// Allocate the stack space
-#   	pushREGFILE
-# 	csrr	t0, CSR_MSTATUS	
-# 	STORE	t0, 32 * REGBYTES(sp)
-#   	csrr t0,   CSR_MEPC
-#   	STORE t0,  33*REGBYTES(sp)
-#   	csrr t0,   CSR_MSUBM
-#   	STORE t0,  34*REGBYTES(sp)
-# 	csrr t0,   CSR_MCAUSE
-#   	STORE t0,  35*REGBYTES(sp)
-	
-	
-# int_loop:             // 3 instructions in pending-interrupt service loop.
-#   	csrrw ra, CSR_JALMNXTI, ra    
-        
-#   //	csrrsi a0, CSR_MNXTI, MSTATUS_MIE   // Claim any pending interrupt at level > mcause.pil 
-#   //	bnez a0, int_loop   // Loop to service any interrupt. 
-
-#   	#---- Critical section with interrupts disabled -----------------------
-#   	DISABLE_MIE # Disable interrupts
-  
- 	
-# 	LOAD t0,  35*REGBYTES(sp)
-#   	csrw CSR_MCAUSE, t0   
-# 	LOAD t0,  34*REGBYTES(sp)
-#   	csrw CSR_MSUBM, t0 
-# 	LOAD t0,  33*REGBYTES(sp)
-#   	csrw CSR_MEPC, t0  
-#   	LOAD t0,  32*REGBYTES(sp)
-#  	csrw CSR_MSTATUS, t0 
-
-#   	popREGFILE
-#   	mret
 
 .align 2
 .globl MTIME_HANDLER
@@ -435,12 +302,6 @@ vPortEndScheduler:
  j 1b
 
 
-
-//Bob: we dont need this
-//.weak handle_interrupt
-//handle_interrupt:
-//1:
-  j 1b
 
 
 
