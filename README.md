@@ -1,10 +1,4 @@
-# README #
-The purpose of this repo is to make it used by the commercial nucleisy n series processor core.
+# Important Note
 
-support below nucleisys core:
-* n200
-* n300
-* n600
-
-
+**This project will no longer be updated and maintained, please change to https://github.com/Nuclei-Software/nuclei-sdk**
 
